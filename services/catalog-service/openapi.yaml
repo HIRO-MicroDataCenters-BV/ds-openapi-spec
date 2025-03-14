@@ -1,0 +1,590 @@
+openapi: 3.1.0
+info:
+  title: Data Space Catalog
+  description: The service provides a REST API for managing and sharing catalog items.
+  contact:
+    name: HIRO-MicroDataCenters
+    email: all-hiro@hiro-microdatacenters.nl
+  license:
+    name: MIT
+    url: https://github.com/HIRO-MicroDataCenters-BV/ds-catalog/blob/main/LICENSE
+  version: 0.1.0
+  
+paths:
+  /catalog/:
+    get:
+      tags:
+        - Catalog
+      summary: Get Local Catalog
+      description: Get the local catalog with dataset list
+      operationId: get_catalog
+      parameters:
+        - name: filter
+          in: query
+          description: |
+            Dynamic filter parameters that can include entity attributes, such as elements from the DCAT ontology (for example, dcat:Dataset.dcat:theme or dcat:Dataset.dcat:title). This parameter allows filtering results using any attributes defined in an ontology or data schema. Filter keys can be in the format: filter[namespace:Class.namespace:attribute...]=value and can use special operators like __gte, __lte, __in, and __contains. Multiple filters can be combined in a single query, and they will be joined using AND logic. This means that all provided filters must be satisfied for the query to return results. For example, a query with filters "filter[dcat:Dataset.dcat:theme]=environment&filter[dcat:Dataset.dcat:title]=Example Dataset" will return only those items that meet both conditions.
+          required: false
+          explode: true
+          style: form
+          schema:
+            type: object
+            additionalProperties: true
+            example:
+              filter[dcat:Dataset.dcterms:title]: Example Dataset
+              filter[dcat:Dataset.dcterms:title@en]: Example Dataset
+              filter[dcat:Dataset.dcterms:title.@language]: en
+              filter[dcat:Dataset.dcterms:title.@value]: Example Dataset
+              filter[dcat:Dataset.dcterms:title@en.@value]: Example Dataset
+              filter[dcat:Dataset.dcat:distribution.dcat:format]: PDF
+              filter[dcat:Dataset.dspace:extraMetadata.med:sex]: M
+              filter[dcat:Dataset.dspace:extraMetadata.med:weight]: 75
+              filter[dcat:Dataset.dspace:extraMetadata.med:weight.@value]: 75
+              filter[dcat:Dataset.dspace:extraMetadata.med:weight.@type]: xsd:integer
+              filter[dcat:Dataset.dcterms:datePublished__gte]: 2021-01-01
+              filter[dcat:Dataset.dcterms:datePublished__lte]: 2021-12-31
+              filter[dcat:Dataset.dspace:extraMetadata.med:weight__gte]: 70
+              filter[dcat:Dataset.dspace:extraMetadata.med:weight__lte]: 70
+              filter[dcat:Dataset.dcat:keyword__in]: ["science", "health"]
+              filter[dcat:Dataset.dcterms:title@en__contains]: "Example"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/ld+json:
+              schema:
+                type: object
+                properties:
+                  "@context":
+                    $ref: "#/components/schemas/Context"
+                  "@graph":
+                    $ref: "#/components/schemas/Catalog"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        
+  /datasets/:
+    post:
+      tags:
+        - Datasets
+      summary: Save Dataset
+      description: Create or update a dataset
+      operationId: save_dataset
+      requestBody:
+        required: true
+        content:
+          application/ld+json:
+            schema:
+              type: object
+              properties:
+                "@context":
+                  $ref: "#/components/schemas/Context"
+                "@graph":
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DatasetInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/ld+json:
+              schema:
+                type: object
+                properties:
+                  "@context":
+                    $ref: "#/components/schemas/Context"
+                  "@graph":
+                    $ref: "#/components/schemas/Dataset"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+                
+  /datasets/{id}/:
+    get:
+      tags:
+        - Datasets
+      summary: Get Dataset
+      description: Get the dataset
+      operationId: get_dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/ld+json:
+              schema:
+                type: object
+                properties:
+                  "@context":
+                    $ref: "#/components/schemas/Context"
+                  "@graph":
+                    $ref: "#/components/schemas/Dataset"
+        '404':
+          description: Dataset not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+                
+    delete:
+      tags:
+        - Datasets
+      summary: Delete Dataset
+      description: Delete the dataset
+      operationId: delete_dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Dataset not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+                
+  /datasets/{id}/share/:
+    post:
+      tags:
+        - Sharing
+      summary: Share Dataset
+      description: Share the dataset
+      operationId: share_dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Dataset not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+components:
+  schemas:
+    LangString:
+      type: object
+      required:
+        - "@value"
+        - "@language"
+      properties:
+        "@value":
+          type: string
+        "@language":
+          type: string
+          example: "en"
+          
+    DomainSpecificEntity:
+      title: Domain-specific Entity
+      type: object
+      required:
+        - "@id"
+        - "@type"
+      properties:
+        "@id":
+          title: Identifier
+          type: string
+        "@type":
+          title: Type
+          type: string
+      additionalProperties: True
+  
+    RelEntity:
+      title: RelEntity
+      type: object
+      required:
+        - "@id"
+      properties:
+        "@id":
+          title: Identifier
+          type: string
+      additionalProperties: True
+    
+    Context:
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+        "dcat": "http://www.w3.org/ns/dcat#"
+        "dcterms": "http://purl.org/dc/terms/"
+        "spdx": "http://spdx.org/rdf/terms#"
+        "foaf": "http://xmlns.com/foaf/0.1/"
+        "dspace": "http://data-space.org/"
+    
+    Catalog:
+      title: Catalog
+      type: object
+      required:
+        - "@id"
+        - "@type"
+        - "dcterms:title"
+        - "dcterms:description"
+        - "dcat:dataset"
+        - "dcat:service"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the distribution (URI or other ID).
+          type: string
+          example: "https://example.com/catalog/123"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "dcat:Catalog"
+        "dcterms:title":
+          title: Title
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "Sample Catalog"
+        "dcterms:description":
+          title: Description
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "This is a sample catalog containing various datasets and services."
+        "dcat:dataset":
+          title: Dataset
+          description: A dataset that is listed in the catalog.
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+        "dcat:service":
+          title: Service
+          description: A service that is listed in the catalog.
+          type: array
+          items:
+            $ref: '#/components/schemas/RelEntity'
+      additionalProperties: True
+
+    DatasetBase:
+      title: Dataset Base
+      type: object
+      required:
+        - "@id"
+        - "@type"
+        - "dcterms:title"
+        - "dcterms:description"
+        - "dcat:distribution"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the distribution (URI or other ID).
+          type: string
+          example: "https://example.com/dataset/789"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "dcat:Dataset"
+        "dcterms:identifier":
+          title: Identifier
+          description: Local, domain identifier. Can be any string value (e.g. UUID, system code, serial number, etc.).
+          type: string
+          example: "abc-123-xyz"
+        "dcterms:title":
+          title: Title
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "Sample Dataset Title"
+            - "@language": "es"
+              "@value": "Título del conjunto de datos de ejemplo"
+        "dcterms:description":
+          title: Description
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "This dataset contains sample data for testing purposes."
+            - "@language": "es"
+              "@value": "Este conjunto de datos contiene datos de ejemplo para fines de prueba."
+        "dcat:keyword":
+          title: Keyword
+          description: Tags associated with the dataset.
+          type: array
+          items:
+            type: string
+          example:
+            - "sample"
+            - "data"
+        "dcterms:license":
+          title: License
+          description: License under which the dataset is distributed.
+          type: string
+          example: "https://example.com/license/xyz"
+        "dcat:theme":
+          title: Theme
+          description: Category or classification of the dataset.
+          type: array
+          items:
+            type: string
+          example:
+            - "Science"
+            - "Technology"
+        "dcat:distribution":
+          title: Distribution
+          type: array
+          items:
+            $ref: '#/components/schemas/Distribution'
+        "dspace:extraMetadata":
+          title: Domain-specific metadata
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainSpecificEntity'
+          example:
+            - "@id": "https://example.com/metadata/1"
+              "@type": "med:Patient"
+              "med:height": {
+                "@value": "180",
+                "@type": "xsd:integer"
+              }
+              "med:weight": {
+                "@value": "75",
+                "@type": "xsd:integer"
+              }
+              "med:sex": "M"
+              "med:birthDate": "1990-05-20"
+            - "@id": "https://example.com/metadata/2"
+              "@type": "med:Diagnoses"
+              "med:hasDiagnosis":
+                - {
+                    "@id": "https://example.com/diagnosis/1",
+                    "@type": "med:Diagnosis",
+                    "med:code": "I10",
+                    "med:description": "Essential (primary) hypertension"
+                  }
+                - {
+                    "@id": "https://example.com/diagnosis/2",
+                    "@type": "med:Diagnosis",
+                    "med:code": "E11",
+                    "med:description": "Type 2 diabetes mellitus"
+                  }
+      additionalProperties: True
+      
+    DatasetInput:
+      title: Dataset Input
+      allOf:
+        - $ref: '#/components/schemas/DatasetBase'
+      
+    Dataset:
+      title: Dataset
+      allOf:
+        - $ref: '#/components/schemas/DatasetBase'
+        - type: object
+          required:
+            - "dcterms:issued"
+            - "dcterms:creator"
+            - "nextgen:isShared"
+          properties:
+            "dcterms:issued":
+              title: Issued
+              type: string
+              format: date
+              example: "2025-03-13"
+            "dcterms:creator":
+              title: Creator
+              allOf:
+                - $ref: '#/components/schemas/Person'
+            "dspace:isShared":
+              title: Shared
+              description: Indicates whether the dataset is shared across multiple catalogs.
+              type: boolean
+              
+    Checksum:
+      title: Checksum
+      type: object
+      required:
+        - "spdx:algorithm"
+        - "spdx:checksumValue"
+      properties:
+        "spdx:algorithm":
+          title: Algorithm
+          description: Algorithm used to compute the checksum.
+          type: string
+          enum:
+            - SHA-1
+            - SHA-256
+            - MD5
+          example: "SHA-256"
+        "spdx:checksumValue":
+          title: Checksum Value
+          description: The actual checksum value.
+          type: string
+          example: "3a7bd3e2360a3b5c1b2ef3b1a4e8f7a6"
+      additionalProperties: true
+  
+    Distribution:
+      title: Distribution
+      type: object
+      required:
+        - "@id"
+        - "@type"
+        - "dcat:byteSize"
+        - "dcat:mediaType"
+        - "spdx:checksum"
+        - "dcat:accessService"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the distribution (URI or other ID).
+          type: string
+          example: "https://example.com/distribution/489"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "dcat:Distribution"
+        "dcat:byteSize":
+          title: Byte Size
+          description: Size of the distribution in bytes.
+          type: integer
+          example: 1024
+        "dcat:mediaType":
+          title: Media Type
+          description: MIME type of the distribution.
+          type: string
+          example: "application/json"
+        "spdx:checksum":
+          title: Checksum
+          description: Checksum for integrity verification.
+          allOf:
+            - $ref: "#/components/schemas/Checksum"
+        "dcat:accessService":
+          title: Access Service
+          description: Data service providing access to the distribution.
+          type: array
+          items:
+            $ref: "#/components/schemas/DataService"
+      additionalProperties: true
+      
+    DataService:
+      title: Data Service
+      type: object
+      required:
+        - "@id"
+        - "@type"
+        - "dcat:endpointURL"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the data service (URI or other ID).
+          type: string
+          example: "https://example.com/dataservice/456"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "dcat:DataService"
+        "dcat:endpointURL":
+          title: Endpoint URL
+          description: URL of the data service endpoint.
+          type: string
+          format: uri
+          example: "https://api.example.com/data"
+      additionalProperties: true
+    
+    Person:
+      title: Person
+      type: object
+      required:
+        - "@id"
+        - "foaf:name"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the person (URI or other ID).
+          type: string
+          example: "https://example.com/person/123"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "foaf:Person"
+        "foaf:name":
+          title: Name
+          description: Full name of the person.
+          type: string
+          example: "John Doe"
+      additionalProperties: true
+  
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+          example:
+            - "@graph"
+            - 0
+            - "dcat:dataset"
+            - 0
+            - "dcterms:title"
+            - 0
+            - "value"
+        msg:
+          type: string
+          title: Message
+          example: "Field required"
+        type:
+          type: string
+          title: Error Type
+          example: "value_error.missing"
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
