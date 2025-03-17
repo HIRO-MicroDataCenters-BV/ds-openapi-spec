@@ -301,7 +301,9 @@ components:
           description: A dataset that is listed in the catalog.
           type: array
           items:
-            $ref: '#/components/schemas/Dataset'
+            anyOf:
+              - $ref: '#/components/schemas/Dataset'
+              - $ref: '#/components/schemas/DatasetSeries'
         "dcat:service":
           title: Service
           description: A service that is listed in the catalog.
@@ -309,6 +311,80 @@ components:
           items:
             $ref: '#/components/schemas/RelEntity'
       additionalProperties: True
+
+    DatasetSeries:
+      title: Dataset Series
+      type: object
+      required:
+        - "@id"
+        - "@type"
+        - "dcterms:title"
+        - "dcterms:description"
+        - "dcat:first"
+        - "dcat:last"
+      properties:
+        "@id":
+          title: Identifier
+          description: Unique identifier for the Dataset Series (URI or other ID).
+          type: string
+          example: "https://example.com/dataset-series/789"
+        "@type":
+          title: Type
+          description: Ontology class type.
+          type: string
+          example: "dcat:DatasetSeries"
+        "dcterms:identifier":
+          title: Identifier
+          description: Local, domain identifier. Can be any string value (e.g. UUID, system code, serial number, etc.).
+          type: string
+          example: "abc-123-xyz"
+        "dcterms:title":
+          title: Title
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "Sample Dataset Series Title"
+        "dcterms:description":
+          title: Description
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "This dataset contains sample data for testing purposes."
+            - "@language": "es"
+              "@value": "Este conjunto de datos contiene datos de ejemplo para fines de prueba."
+        "dcat:keyword":
+          title: Keyword
+          description: Tags associated with the dataset.
+          type: array
+          items:
+            type: string
+          example:
+            - "sample"
+            - "data"
+        "dcterms:license":
+          title: License
+          description: License under which the dataset is distributed.
+          type: string
+          example: "https://example.com/license/xyz"
+        "dcat:theme":
+          title: Theme
+          description: Category or classification of the dataset.
+          type: array
+          items:
+            type: string
+          example:
+            - "Science"
+            - "Technology"
+        "dcat:first":
+          $ref: '#/components/schemas/RelEntity'
+        "dcat:last":
+          $ref: '#/components/schemas/RelEntity'
+        "dcat:previous":
+          $ref: '#/components/schemas/RelEntity'
 
     DatasetBase:
       title: Dataset Base
@@ -383,6 +459,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Distribution'
+        "dcat:inSeries":
+          $ref: '#/components/schemas/RelEntity'
+        "dcat:prev":
+          $ref: '#/components/schemas/RelEntity'
+        "dcat:next":
+          $ref: '#/components/schemas/RelEntity'
         "dspace:extraMetadata":
           title: Domain-specific metadata
           type: array
