@@ -22,30 +22,50 @@ paths:
         - name: filter
           in: query
           description: |
-            Dynamic filter parameters that can include entity attributes, such as elements from the DCAT ontology (for example, dcat:Dataset.dcat:theme or dcat:Dataset.dcat:title). This parameter allows filtering results using any attributes defined in an ontology or data schema. Filter keys can be in the format: filter[namespace:Class.namespace:attribute...]=value and can use special operators like __gte, __lte, __in, and __contains. Multiple filters can be combined in a single query, and they will be joined using AND logic. This means that all provided filters must be satisfied for the query to return results. For example, a query with filters "filter[dcat:Dataset.dcat:theme]=environment&filter[dcat:Dataset.dcat:title]=Example Dataset" will return only those items that meet both conditions.
+            Dynamic filter parameters.
+            Filters use the format:
+
+            <b>filter[</b><span style="color:blue;">[namespace:Class__]</span><b>namespace:attribute</b><span style="color:blue;">[.[namespace:Class__]namespace:attribute...][.@language|@lang|.@value|.@type][__operator]</span><b>] = value</b>
+
+            *Optional syntax*: <span style="color:blue;">[...]</span>
+
+            **Supported operators:**
+            - `__gte`, `__lte` (range filtering)
+            - `__in` (list filtering)
+            - `__contains` (substring search)
+
+            **Examples:**
+            - `filter[dcat:Dataset__dcterms:title]=example`
+            - `filter[dcterms:title]=example`
+            - `filter[dcterms:title@en]=example`
+            - `filter[dcterms:title.@language]=en`
+            - `filter[dcterms:title.@value]=example`
+            - `filter[dcterms:title@en.@value]=example`
+            - `filter[dcat:distribution.dcat:format]=PDF`
+            - `filter[dspace:extraMetadata.med:sex]=M`
+            - `filter[dcat:Dataset__dspace:extraMetadata.med:Patient__med:sex]=M`
+            - `filter[dspace:extraMetadata.med:sex]=M`
+            - `filter[dspace:extraMetadata.med:weight]=75`
+            - `filter[dspace:extraMetadata.med:weight.@value]=75`
+            - `filter[dspace:extraMetadata.med:weight.@type]=xsd:integer`
+            - `filter[dcterms:datePublished__gte]=2021-01-01`
+            - `filter[dcterms:datePublished__lte]=2021-12-31`
+            - `filter[dspace:extraMetadata.med:weight__gte]=70`
+            - `filter[dspace:extraMetadata.med:weight__lte]=70`
+            - `filter[dcat:keyword__in]=[science, health]`
+            - `filter[dcterms:title@en__contains]=example`
+
+            **Multiple filters**: You can apply multiple filters by separating them with `&`:
+
+            ```
+            filter[...]=value&filter[...]=anotherValue
+            ```
           required: false
           explode: true
           style: form
           schema:
             type: object
             additionalProperties: true
-            example:
-              filter[dcat:Dataset.dcterms:title]: Example Dataset
-              filter[dcat:Dataset.dcterms:title@en]: Example Dataset
-              filter[dcat:Dataset.dcterms:title.@language]: en
-              filter[dcat:Dataset.dcterms:title.@value]: Example Dataset
-              filter[dcat:Dataset.dcterms:title@en.@value]: Example Dataset
-              filter[dcat:Dataset.dcat:distribution.dcat:format]: PDF
-              filter[dcat:Dataset.dspace:extraMetadata.med:sex]: M
-              filter[dcat:Dataset.dspace:extraMetadata.med:weight]: 75
-              filter[dcat:Dataset.dspace:extraMetadata.med:weight.@value]: 75
-              filter[dcat:Dataset.dspace:extraMetadata.med:weight.@type]: xsd:integer
-              filter[dcat:Dataset.dcterms:datePublished__gte]: 2021-01-01
-              filter[dcat:Dataset.dcterms:datePublished__lte]: 2021-12-31
-              filter[dcat:Dataset.dspace:extraMetadata.med:weight__gte]: 70
-              filter[dcat:Dataset.dspace:extraMetadata.med:weight__lte]: 70
-              filter[dcat:Dataset.dcat:keyword__in]: ["science", "health"]
-              filter[dcat:Dataset.dcterms:title@en__contains]: "Example"
       responses:
         '200':
           description: Successful Response
