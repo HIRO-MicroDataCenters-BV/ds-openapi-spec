@@ -42,7 +42,6 @@ paths:
             - `filter[dcat:dataset.dcat:distribution.dcat:format]=PDF`
             - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
             - `filter[dcat:dataset.dspace:extraMetadata.med:Patient__med:sex]=M`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight]=75`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight.@value]=75`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight.@type]=xsd:integer`
