@@ -35,7 +35,6 @@ paths:
             - `__contains` (substring search)
 
             **Examples:**
-            - `filter[dcat:Catalog__dcat:dataset.dcterms:title]=example`
             - `filter[dcat:dataset.dcterms:title]=example`
             - `filter[dcat:dataset.dcterms:title@en]=example`
             - `filter[dcat:dataset.dcterms:title.@language]=en`
@@ -43,7 +42,7 @@ paths:
             - `filter[dcat:dataset.dcterms:title@en.@value]=example`
             - `filter[dcat:dataset.dcat:distribution.dcat:format]=PDF`
             - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
-            - `filter[dcat:dataset.dcat:Dataset__dspace:extraMetadata.med:Patient__med:sex]=M`
+            - `filter[dcat:dataset.dspace:extraMetadata.med:Patient__med:sex]=M`
             - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight]=75`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight.@value]=75`
