@@ -50,7 +50,7 @@ paths:
             - `filter[dcat:dataset.dcterms:datePublished__lte]=2021-12-31`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight__gte]=70`
             - `filter[dcat:dataset.dspace:extraMetadata.med:weight__lte]=70`
-            - `filter[dcat:dataset.dcat:keyword__in]=[science, health]`
+            - `filter[dcat:dataset.dcat:keyword__in]=science,health`
             - `filter[dcat:dataset.dcterms:title@en__contains]=example`
 
             **Multiple filters**: You can apply multiple filters by separating them with `&`:
