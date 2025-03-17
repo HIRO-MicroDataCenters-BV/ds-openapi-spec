@@ -39,7 +39,6 @@ paths:
             - `filter[dcat:dataset.dcterms:title@en]=example`
             - `filter[dcat:dataset.dcterms:title.@language]=en`
             - `filter[dcat:dataset.dcterms:title.@value]=example`
-            - `filter[dcat:dataset.dcterms:title@en.@value]=example`
             - `filter[dcat:dataset.dcat:distribution.dcat:format]=PDF`
             - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
             - `filter[dcat:dataset.dspace:extraMetadata.med:Patient__med:sex]=M`
