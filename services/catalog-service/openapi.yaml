@@ -461,10 +461,6 @@ components:
             $ref: '#/components/schemas/Distribution'
         "dcat:inSeries":
           $ref: '#/components/schemas/RelEntity'
-        "dcat:prev":
-          $ref: '#/components/schemas/RelEntity'
-        "dcat:next":
-          $ref: '#/components/schemas/RelEntity'
         "dspace:extraMetadata":
           title: Domain-specific metadata
           type: array
