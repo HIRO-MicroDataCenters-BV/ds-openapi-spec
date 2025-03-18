@@ -234,7 +234,7 @@ components:
         "@type":
           title: Type
           type: string
-      additionalProperties: True
+      additionalProperties: true
   
     RelEntity:
       title: RelEntity
@@ -245,8 +245,43 @@ components:
         "@id":
           title: Identifier
           type: string
-      additionalProperties: True
+      additionalProperties: true
     
+    Theme:
+      title: Theme
+      description: Category or classification.
+      type: array
+      items:
+        type: object
+        required:
+          - "@id"
+          - "@type"
+          - "skos:prefLabel"
+        properties:
+          "@id":
+            title: Identifier
+            type: string
+          "@type":
+            title: Type
+            description: Ontology class type.
+            type: string
+          "skos:prefLabel":
+            type: array
+            items:
+              $ref: '#/components/schemas/LangString'
+          additionalProperties: true
+      example:
+        - "@id": "http://eurovoc.europa.eu/100142"
+          "@type": "skos:Concept"
+          "skos:prefLabel":
+            - "@value": "Agriculture"
+              "@language": "en"
+        - "@id": "http://eurovoc.europa.eu/100141"
+          "@type": "skos:Concept"
+          "skos:prefLabel":
+            - "@value": "Health"
+              "@language": "en"
+
     Context:
       type: object
       additionalProperties:
@@ -254,9 +289,11 @@ components:
       example:
         "xsd": "http://www.w3.org/2001/XMLSchema#"
         "dcat": "http://www.w3.org/ns/dcat#"
+        "dcatap":	"http://data.europa.eu/r5r/"
         "dcterms": "http://purl.org/dc/terms/"
         "spdx": "http://spdx.org/rdf/terms#"
         "foaf": "http://xmlns.com/foaf/0.1/"
+        "skos": "http://www.w3.org/2004/02/skos/core#"
         "dspace": "http://data-space.org/"
     
     Catalog:
@@ -267,8 +304,7 @@ components:
         - "@type"
         - "dcterms:title"
         - "dcterms:description"
-        - "dcat:dataset"
-        - "dcat:service"
+        - "dcterms:publisher"
       properties:
         "@id":
           title: Identifier
@@ -296,6 +332,10 @@ components:
           example:
             - "@language": "en"
               "@value": "This is a sample catalog containing various datasets and services."
+        "dcterms:publisher":
+          title: Publisher
+          allOf:
+            - $ref: '#/components/schemas/Agent'
         "dcat:dataset":
           title: Dataset
           description: A dataset that is listed in the catalog.
@@ -304,13 +344,7 @@ components:
             anyOf:
               - $ref: '#/components/schemas/Dataset'
               - $ref: '#/components/schemas/DatasetSeries'
-        "dcat:service":
-          title: Service
-          description: A service that is listed in the catalog.
-          type: array
-          items:
-            $ref: '#/components/schemas/RelEntity'
-      additionalProperties: True
+      additionalProperties: true
 
     DatasetSeries:
       title: Dataset Series
@@ -320,8 +354,6 @@ components:
         - "@type"
         - "dcterms:title"
         - "dcterms:description"
-        - "dcat:first"
-        - "dcat:last"
       properties:
         "@id":
           title: Identifier
@@ -371,20 +403,15 @@ components:
           type: string
           example: "https://example.com/license/xyz"
         "dcat:theme":
-          title: Theme
-          description: Category or classification of the dataset.
-          type: array
-          items:
-            type: string
-          example:
-            - "Science"
-            - "Technology"
+          $ref: '#/components/schemas/Theme'
         "dcat:first":
           $ref: '#/components/schemas/RelEntity'
         "dcat:last":
           $ref: '#/components/schemas/RelEntity'
         "dcat:previous":
           $ref: '#/components/schemas/RelEntity'
+        "dcterms:publisher":
+          $ref: '#/components/schemas/Agent'
 
     DatasetBase:
       title: Dataset Base
@@ -394,7 +421,6 @@ components:
         - "@type"
         - "dcterms:title"
         - "dcterms:description"
-        - "dcat:distribution"
       properties:
         "@id":
           title: Identifier
@@ -446,14 +472,7 @@ components:
           type: string
           example: "https://example.com/license/xyz"
         "dcat:theme":
-          title: Theme
-          description: Category or classification of the dataset.
-          type: array
-          items:
-            type: string
-          example:
-            - "Science"
-            - "Technology"
+          $ref: '#/components/schemas/Theme'
         "dcat:distribution":
           title: Distribution
           type: array
@@ -494,7 +513,7 @@ components:
                     "med:code": "E11",
                     "med:description": "Type 2 diabetes mellitus"
                   }
-      additionalProperties: True
+      additionalProperties: true
       
     DatasetInput:
       title: Dataset Input
@@ -508,7 +527,6 @@ components:
         - type: object
           required:
             - "dcterms:issued"
-            - "dcterms:creator"
             - "nextgen:isShared"
           properties:
             "dcterms:issued":
@@ -516,10 +534,10 @@ components:
               type: string
               format: date
               example: "2025-03-13"
-            "dcterms:creator":
-              title: Creator
+            "dcterms:publisher":
+              title: Publisher
               allOf:
-                - $ref: '#/components/schemas/Person'
+                - $ref: '#/components/schemas/Agent'
             "dspace:isShared":
               title: Shared
               description: Indicates whether the dataset is shared across multiple catalogs.
@@ -554,10 +572,7 @@ components:
       required:
         - "@id"
         - "@type"
-        - "dcat:byteSize"
-        - "dcat:mediaType"
-        - "spdx:checksum"
-        - "dcat:accessService"
+        - "dcat:accessURL"
       properties:
         "@id":
           title: Identifier
@@ -569,21 +584,52 @@ components:
           description: Ontology class type.
           type: string
           example: "dcat:Distribution"
+        "dcterms:description":
+          title: Description
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "This is a sample distribution."
         "dcat:byteSize":
           title: Byte Size
           description: Size of the distribution in bytes.
           type: integer
-          example: 1024
+          example:
+            "@value": 1024
+            "@type": "xsd:decimal"
         "dcat:mediaType":
           title: Media Type
           description: MIME type of the distribution.
+          allOf:
+            - $ref: '#/components/schemas/RelEntity'
+          example:
+            "@id": "https://www.iana.org/assignments/media-types/application/json"
+        "dcat:format":
+          title: Format
+          description: File format of the distribution (e.g., CSV, JSON).
           type: string
-          example: "application/json"
+          example: "JSON"
+        "dcatap:availability":
+          title: Availability
+          description: Availability status of the distribution.
+          allOf:
+            - $ref: '#/components/schemas/RelEntity'
+          example:
+            - "@id": "http://data.europa.eu/r5r/AVAILABLE"
         "spdx:checksum":
           title: Checksum
           description: Checksum for integrity verification.
           allOf:
             - $ref: "#/components/schemas/Checksum"
+        "dcat:accessURL":
+          title: Access URL
+          description: The resource at the access URL may contain information about how to get the Dataset.
+          allOf:
+            - $ref: '#/components/schemas/RelEntity'
+          example:
+            "@id": "https://example.com/distribution/489/information"
         "dcat:accessService":
           title: Access Service
           description: Data service providing access to the distribution.
@@ -610,16 +656,25 @@ components:
           description: Ontology class type.
           type: string
           example: "dcat:DataService"
+        "dcterms:title":
+          title: Title
+          type: array
+          items:
+            $ref: '#/components/schemas/LangString'
+          example:
+            - "@language": "en"
+              "@value": "Sample Data Service"
         "dcat:endpointURL":
           title: Endpoint URL
           description: URL of the data service endpoint.
-          type: string
-          format: uri
-          example: "https://api.example.com/data"
+          allOf:
+            - $ref: '#/components/schemas/RelEntity'
+          example:
+            "@id": "https://example.com/dataservice/456/download"
       additionalProperties: true
     
-    Person:
-      title: Person
+    Agent:
+      title: Agent
       type: object
       required:
         - "@id"
@@ -634,7 +689,7 @@ components:
           title: Type
           description: Ontology class type.
           type: string
-          example: "foaf:Person"
+          example: "foaf:Agent"
         "foaf:name":
           title: Name
           description: Full name of the person.
