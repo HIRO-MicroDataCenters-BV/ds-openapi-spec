@@ -25,7 +25,7 @@ paths:
             Dynamic filter parameters.
             Filters use the format:
 
-            <b>filter[</b><span style="color:blue;">[namespace:Class__]</span><b>namespace:attribute</b><span style="color:blue;">[.[namespace:Class__]namespace:attribute...][.@language|@lang|.@value|.@type][__operator]</span><b>] = value</b>
+            <b>filter[</b><span style="color:blue;">[namespace:Class__]</span><b>namespace:attribute</b><span style="color:blue;">[.[namespace:Class__]namespace:attribute...][@lang|.@language|.@value|.@type][__operator]</span><b>] = value</b>
 
             *Optional syntax*: <span style="color:blue;">[...]</span>
 
@@ -188,6 +188,32 @@ paths:
       summary: Share Dataset
       description: Share the dataset
       operationId: share_dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Dataset not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /datasets/{id}/unshare/:
+    post:
+      tags:
+        - Sharing
+      summary: Unshare Dataset
+      description: Unshare the dataset
+      operationId: unshare_dataset
       parameters:
         - name: id
           in: path
