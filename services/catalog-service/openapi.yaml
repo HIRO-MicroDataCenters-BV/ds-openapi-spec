@@ -12,57 +12,140 @@ info:
   
 paths:
   /catalog/:
-    get:
+    post:
       tags:
         - Catalog
       summary: Get Local Catalog
-      description: Get the local catalog with dataset list
+      description: |
+        Get the local catalog with dataset list.
+    
+        The request accepts filters as a JSON object in the body.
+    
+        ### Format:
+        Filters are structured as nested JSON objects. Each filter defines the path to the field with optional operators or language annotations.
+        
+        ```json
+        {
+          "context": {
+            "<namespace>": "<namespaceURL>",
+            ...
+          }
+          "filters": [
+            {
+              ["type": "<namespace:Class>",]
+              "<namespace:attribute>[@<lang>][__operator]": <value> | <nestedObject>
+            },
+            ...
+          ]
+        }
+        ```
+    
+        ### Supported operators:
+        - `__gte`, `__lte` — range filtering
+        - `__in` — list filtering
+        - `__contains` — substring search
+    
+        ### Example:
+        ```json
+        {
+          "context": {
+            "dcat": "http://www.w3.org/ns/dcat#",
+            "dspace": "http://data-space.org/",
+            "med": "http://med.example.org/"
+          },
+          "filters": [
+            {
+              "dcat:dataset": {
+                "dspace:extraMetadata": {
+                  "type": "med:Diagnoses",
+                  "med:hasDiagnosis": {
+                    "med:code__contains": "I10"
+                  }
+                }
+              }
+            }
+          ]
+        }
+        ```
+    
+        ### More filter examples:
+        - ```json
+          { "dcat:dataset": { "dcterms:title": "example" } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:title@en": "example" } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:title": { "@language": "en" } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:title": { "@value": "example" } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcat:distribution": { "dcat:format": "PDF" } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:sex": "M" } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "type": "med:Patient", "med:sex": "M" } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": 75 } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": { "@value": 75 } } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": { "@type": "xsd:integer" } } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:datePublished__gte": "2021-01-01" } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:datePublished__lte": "2021-12-31" } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight__gte": 70 } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight__lte": 70 } } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcat:keyword__in": ["science", "health"] } }
+          ```
+        - ```json
+          { "dcat:dataset": { "dcterms:title@en__contains": "example" } }
+          ```
       operationId: get_catalog
-      parameters:
-        - name: filter
-          in: query
-          description: |
-            Dynamic filter parameters.
-            Filters use the format:
-
-            <b>filter[</b><span style="color:blue;">[namespace:Class__]</span><b>namespace:attribute</b><span style="color:blue;">[.[namespace:Class__]namespace:attribute...][@lang|.@language|.@value|.@type][__operator]</span><b>] = value</b>
-
-            *Optional syntax*: <span style="color:blue;">[...]</span>
-
-            **Supported operators:**
-            - `__gte`, `__lte` (range filtering)
-            - `__in` (list filtering)
-            - `__contains` (substring search)
-
-            **Examples:**
-            - `filter[dcat:dataset.dcterms:title]=example`
-            - `filter[dcat:dataset.dcterms:title@en]=example`
-            - `filter[dcat:dataset.dcterms:title.@language]=en`
-            - `filter[dcat:dataset.dcterms:title.@value]=example`
-            - `filter[dcat:dataset.dcat:distribution.dcat:format]=PDF`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:sex]=M`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:Patient__med:sex]=M`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:weight]=75`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:weight.@value]=75`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:weight.@type]=xsd:integer`
-            - `filter[dcat:dataset.dcterms:datePublished__gte]=2021-01-01`
-            - `filter[dcat:dataset.dcterms:datePublished__lte]=2021-12-31`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:weight__gte]=70`
-            - `filter[dcat:dataset.dspace:extraMetadata.med:weight__lte]=70`
-            - `filter[dcat:dataset.dcat:keyword__in]=science,health`
-            - `filter[dcat:dataset.dcterms:title@en__contains]=example`
-
-            **Multiple filters**: You can apply multiple filters by separating them with `&`:
-
-            ```
-            filter[...]=value&filter[...]=anotherValue
-            ```
-          required: false
-          explode: true
-          style: form
-          schema:
-            type: object
-            additionalProperties: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - context
+                - filters
+              type: object
+              properties:
+                context:
+                  $ref: "#/components/schemas/Context"
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+              example:
+                context:
+                  dcat: "http://www.w3.org/ns/dcat#"
+                  dspace: "http://data-space.org/"
+                  med: "http://med.example.org/"
+                filters:
+                  - "dcat:dataset":
+                      "dspace:extraMetadata":
+                        "type": "med:Diagnoses"
+                        "med:hasDiagnosis":
+                          "med:code__contains": "I10"
       responses:
         '200':
           description: Successful Response
@@ -70,6 +153,9 @@ paths:
             application/ld+json:
               schema:
                 type: object
+                required:
+                  - "@context"
+                  - "@graph"
                 properties:
                   "@context":
                     $ref: "#/components/schemas/Context"
@@ -95,6 +181,9 @@ paths:
           application/ld+json:
             schema:
               type: object
+              required:
+                - "@context"
+                - "@graph"
               properties:
                 "@context":
                   $ref: "#/components/schemas/Context"
@@ -109,6 +198,9 @@ paths:
             application/ld+json:
               schema:
                 type: object
+                required:
+                - "@context"
+                - "@graph"
                 properties:
                   "@context":
                     $ref: "#/components/schemas/Context"
@@ -142,6 +234,9 @@ paths:
             application/ld+json:
               schema:
                 type: object
+                required:
+                  - "@context"
+                  - "@graph"
                 properties:
                   "@context":
                     $ref: "#/components/schemas/Context"
@@ -295,7 +390,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/LangString'
-          additionalProperties: true
+      additionalProperties: true
       example:
         - "@id": "http://eurovoc.europa.eu/100142"
           "@type": "skos:Concept"
