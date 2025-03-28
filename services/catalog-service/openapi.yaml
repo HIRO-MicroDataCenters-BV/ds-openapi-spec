@@ -33,7 +33,10 @@ paths:
           "filters": [
             {
               ["type": "<namespace:Class>",]
-              "<namespace:attribute>[@<lang>][__operator]": <value> | <nestedObject>
+              "<namespace:attribute>[@<lang>]": <nestedObject> | <value> | {
+                "operation": "<operator>",
+                "value": <value>
+              }
             },
             ...
           ]
@@ -59,7 +62,10 @@ paths:
                 "dspace:extraMetadata": {
                   "type": "med:Diagnoses",
                   "med:hasDiagnosis": {
-                    "med:code__contains": "I10"
+                    "med:code": {
+                      "operation": "contains",
+                      "value": "I10"
+                    }
                   }
                 }
               }
@@ -100,22 +106,22 @@ paths:
           { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": { "@type": "xsd:integer" } } } }
           ```
         - ```json
-          { "dcat:dataset": { "dcterms:datePublished__gte": "2021-01-01" } }
+          { "dcat:dataset": { "dcterms:datePublished": { "value": "2021-01-01", "operation": "gte" } } }
           ```
         - ```json
-          { "dcat:dataset": { "dcterms:datePublished__lte": "2021-12-31" } }
+          { "dcat:dataset": { "dcterms:datePublished": { "value": "2021-12-31", "operation": "lte" } } }
           ```
         - ```json
-          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight__gte": 70 } } }
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": { "value": 70, "operation": "gte" } } } }
           ```
         - ```json
-          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight__lte": 70 } } }
+          { "dcat:dataset": { "dspace:extraMetadata": { "med:weight": { "value": 70, "operation": "lte" } } } }
           ```
         - ```json
-          { "dcat:dataset": { "dcat:keyword__in": ["science", "health"] } }
+          { "dcat:dataset": { "dcat:keyword": { "value": ["science", "health"], "operation": "in" } } }
           ```
         - ```json
-          { "dcat:dataset": { "dcterms:title@en__contains": "example" } }
+          { "dcat:dataset": { "dcterms:title@en": { "value": "example", "operation": "contains" } } }
           ```
       operationId: get_catalog
       requestBody:
@@ -145,7 +151,9 @@ paths:
                       "dspace:extraMetadata":
                         "type": "med:Diagnoses"
                         "med:hasDiagnosis":
-                          "med:code__contains": "I10"
+                          "med:code":
+                            "value": "I10"
+                            "operation": "contains"
       responses:
         '200':
           description: Successful Response
