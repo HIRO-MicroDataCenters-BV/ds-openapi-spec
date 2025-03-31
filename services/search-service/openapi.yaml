@@ -228,30 +228,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
 
-    post:
-      tags:
-      - Sharing
-      summary: Unhare Dataset
-      description: Unshare a dataset
-      operationId: unshare_dataset
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Id
-      responses:
-        '204':
-          description: Successful Response
-        '404':
-          description: Dataset not found
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
     CatalogFilters:
