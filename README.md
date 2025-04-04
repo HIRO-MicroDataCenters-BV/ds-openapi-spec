@@ -1,6 +1,8 @@
 # ds-openapi-spec
 
-OpenAPI specification for DataSpace services.
+OpenAPI specification for DataSpace services:
+1) [Catalog Service](https://hiro-microdatacenters-bv.github.io/ds-catalog/docs/index.html)
+2) [Search Service](https://hiro-microdatacenters-bv.github.io/ds-openapi-spec/search-service.html)
 
 ## Installation
 
